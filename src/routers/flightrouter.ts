@@ -15,18 +15,44 @@ class FlightRouter implements IBaseRouter {
     }
 
     initRoutes() {
-        this.router.get('/', catchAllErrors(this.ping));
+        this.router.get('/arrivals/:airline', catchAllErrors(this.arrivals));
+        this.router.get('/arrivals', catchAllErrors(this.arrivals));
+        this.router.get('/departures/:airline', catchAllErrors(this.departures));
+        this.router.get('/departures', catchAllErrors(this.departures));
     }
 
     initMiddleware() {
     }
     
-    async ping(req: Request, res: Response) {
+    async arrivals(req: Request, res: Response) {
+        const { airline } = req.params;
         const controller = new FlightController();
 
-        const result = await controller.flights();
+        let data = [];
+        if (airline) {
+            data = await controller.arrivalsByAirline(airline);
+        }
+        else {
+            data = await controller.arrivals();
+        }
 
-        return res.status(200).json(result);
+        return res.status(200).json(data);
+    }
+
+    async departures(req: Request, res: Response) {
+        const { airline } = req.params;
+        const controller = new FlightController();
+
+
+        let data = [];
+        if (airline) {
+            data = await controller.departuresByAirline(airline);
+        }
+        else {
+            data = await controller.departures();
+        }
+
+        return res.status(200).json(data);
     }
 }
 
