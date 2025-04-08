@@ -5,7 +5,7 @@ import FlightController from '../controllers/flightcontroller';
 
 class FlightRouter implements IBaseRouter {
 
-    path = '/flights';
+    path = '/';
     
     router: Router = express.Router();
     
@@ -25,31 +25,41 @@ class FlightRouter implements IBaseRouter {
     }
     
     async arrivals(req: Request, res: Response) {
+        const { scheduledFrom, scheduledTo } = req.query;
         const { airline } = req.params;
         const controller = new FlightController();
 
+        const timePeriods = { 
+            scheduledFrom: scheduledFrom ? new Date(Date.parse(scheduledFrom as string)) : new Date(-8640000000000000),
+            scheduledTo: scheduledTo ? new Date(Date.parse(scheduledTo as string)) : new Date(8640000000000000),
+        };
+
         let data = [];
         if (airline) {
-            data = await controller.arrivalsByAirline(airline);
+            data = await controller.arrivalsByAirline(airline, timePeriods);
         }
         else {
-            data = await controller.arrivals();
+            data = await controller.arrivals(timePeriods);
         }
 
         return res.status(200).json(data);
     }
 
     async departures(req: Request, res: Response) {
+        const { scheduledFrom, scheduledTo } = req.query;
         const { airline } = req.params;
         const controller = new FlightController();
 
-
+        const timePeriods = { 
+            scheduledFrom: scheduledFrom ? new Date(Date.parse(scheduledFrom as string)) : new Date(-8640000000000000),
+            scheduledTo: scheduledTo ? new Date(Date.parse(scheduledTo as string)) : new Date(8640000000000000),
+        };
         let data = [];
         if (airline) {
-            data = await controller.departuresByAirline(airline);
+            data = await controller.departuresByAirline(airline, timePeriods);
         }
         else {
-            data = await controller.departures();
+            data = await controller.departures(timePeriods);
         }
 
         return res.status(200).json(data);

@@ -4,35 +4,35 @@ import { getData } from '../services/flightdataservice';
 
 class FlightController implements IBaseController {
 
-    async arrivals(): Promise<Flight[]> {
+    async arrivals({ scheduledFrom, scheduledTo }: { scheduledFrom: Date, scheduledTo: Date}): Promise<Flight[]> {
         const { arrivals } = await getData();
 
-        return arrivals.map(this.mapToFlight);
+        return arrivals.map(this.mapToFlight).filter((x: Flight) => x.scheduledDateTime >= scheduledFrom && x.scheduledDateTime <= scheduledTo);
     }
 
-    async departures(): Promise<Flight[]> {
+    async departures({ scheduledFrom, scheduledTo }: { scheduledFrom: Date, scheduledTo: Date}): Promise<Flight[]> {
         const { departures } = await getData();
 
-        return departures.map(this.mapToFlight);
+        return departures.map(this.mapToFlight).filter((x: Flight) => x.scheduledDateTime >= scheduledFrom && x.scheduledDateTime <= scheduledTo);
     }
 
-    async departuresByAirline(airlineIATA: string): Promise<Flight[]> {
-        const departures = await this.departures();
+    async departuresByAirline(airlineIATA: string, { scheduledFrom, scheduledTo }: { scheduledFrom: Date, scheduledTo: Date}): Promise<Flight[]> {
+        const departures = await this.departures({ scheduledFrom, scheduledTo });
 
         return departures.filter(x => x.airlineIATA === airlineIATA);
     }
 
-    async arrivalsByAirline(airlineIATA: string): Promise<Flight[]> {
-        const arrivals = await this.arrivals();
+    async arrivalsByAirline(airlineIATA: string, { scheduledFrom, scheduledTo }: { scheduledFrom: Date, scheduledTo: Date}): Promise<Flight[]> {
+        const arrivals = await this.arrivals({ scheduledFrom, scheduledTo });
 
         return arrivals.filter(x => x.airlineIATA === airlineIATA);
     }
 
     mapToFlight(data: any): Flight {
         return {
-            actualDateTime: data.ActualDateTime,
-            estimatedDateTime: data.EstimatedDateTime,
-            scheduledDateTime: data.ScheduledDateTime,
+            actualDateTime: new Date(Date.parse(data.ActualDateTime)),
+            estimatedDateTime: new Date(Date.parse(data.EstimatedDateTime)),
+            scheduledDateTime: new Date(Date.parse(data.ScheduledDateTime)),
             airlineDesc: data.AirlineDesc,
             airlineIATA: data.AirlineIATA,
             stand: data.StandCode,

@@ -12,7 +12,6 @@ const app = new App({
     port,
     routers: [
         new FlightRouter(),
-        new BaseRouter(),
     ],
 });
 
